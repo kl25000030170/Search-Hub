@@ -6,16 +6,7 @@ It features a React UI, a FastAPI Gateway for orchestration, and a Spring Boot B
 
 ---
 
-## 🏛️ Architecture Overview
 
-SearchHub operates on a modern, decoupled architecture:
-
-```mermaid
-graph TD
-    A[React Frontend <br> Port 5173] -->|API Requests /api| B[FastAPI Gateway <br> Port 8000]
-    B -->|User/Product Queries| C[Spring Boot Backend <br> Port 8080]
-    C -->|JPA / Hibernate| D[(PostgreSQL Database <br> Port 5432)]
-```
 
 1. **Frontend (React + Vite)**: A responsive and clean UI with smart filtering, advanced faceted search, and an administrative dashboard.
 2. **Gateway (FastAPI)**: Serves as the entry gateway. Handles CORS, registers auth, proxies routes, manages token state, and orchestrates services.
@@ -56,7 +47,7 @@ Search-Hub/
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 Ensure you have the following prerequisites installed:
 - **Node.js** (v16+ or newer)
@@ -154,13 +145,5 @@ The React frontend will spin up on **http://localhost:5173**.
 | **PUT** | `/api/items/{id}` | Update item (Admin) |
 | **DELETE** | `/api/items/{id}` | Delete item (Admin) |
 
----
 
-## 🔐 Credentials & Role-Based Access
 
-The frontend supports distinct views based on permissions:
-
-- **Regular User**: `user@example.com` / `password123`
-  - Access to search, browsing, purchasing, and the user dashboard.
-- **Admin**: `admin@example.com` / `admin123`
-  - Full access to the Admin Dashboard at `/admin` (management of products, courses, category additions, and system metrics).
