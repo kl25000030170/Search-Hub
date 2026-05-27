@@ -68,3 +68,14 @@ gateway/.env
 **/ENV/
 gateway/env.bak/
 gateway/venv.bak/
+
+# ==========================================
+# Local Startup Scripts
+# ==========================================
+start_frontend.sh
+start_frontend.bat
+start_gateway.sh
+start_gateway.bat
+start_spring_backend.sh
+start_spring_backend.bat
+
