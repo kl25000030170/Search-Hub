@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -27,7 +28,7 @@ class ProductCreate(BaseModel):
     price: float
     category: str
     rating: float
-    imageUrl: str = None
+    imageUrl: Optional[str] = None
 
 
 class Product(ProductCreate):
@@ -39,9 +40,10 @@ class CourseCreate(BaseModel):
     description: str
     difficulty: str = "Beginner"
     category: str
-    imageUrl: str = None
+    imageUrl: Optional[str] = None
 
 
 class Course(CourseCreate):
     id: int
+
 

@@ -1,5 +1,5 @@
 import requests
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -12,14 +12,19 @@ class SemanticSearchRequest(BaseModel):
     query: str
 
 
-def fetch_all_items():
+def fetch_items_from_backend(q: Optional[str] = None, category: Optional[str] = None, headers: dict = None):
     items = []
+    params = {}
+    if q and q.strip():
+        params["search"] = q.strip()
+    if category and category.strip():
+        params["category"] = category.strip()
+
     # 1. Fetch products
     try:
-        prod_resp = requests.get(f"{SPRING_BOOT_URL}/products")
+        prod_resp = requests.get(f"{SPRING_BOOT_URL}/products", params=params, headers=headers)
         if prod_resp.status_code == 200:
             for p in prod_resp.json():
-                # Derive brand/tags to resemble original mock data
                 name = p.get("name", "")
                 brand = "Generic"
                 if "Speaker" in name or "Earbuds" in name:
@@ -51,7 +56,7 @@ def fetch_all_items():
 
     # 2. Fetch courses
     try:
-        course_resp = requests.get(f"{SPRING_BOOT_URL}/courses")
+        course_resp = requests.get(f"{SPRING_BOOT_URL}/courses", params=params, headers=headers)
         if course_resp.status_code == 200:
             for c in course_resp.json():
                 name = c.get("courseName", "")
@@ -84,6 +89,7 @@ def fetch_all_items():
 
 @router.get("/search")
 def search_items(
+    request: Request,
     q: Optional[str] = None,
     categories: Optional[str] = None,
     brands: Optional[str] = None,
@@ -92,10 +98,22 @@ def search_items(
     rating: Optional[float] = None,
     difficulty: Optional[str] = None
 ):
-    all_items = fetch_all_items()
+    headers = {}
+    auth_header = request.headers.get("Authorization")
+    if auth_header:
+        headers["Authorization"] = auth_header
+
+    # Extract first category to pass to backend query if only one is specified
+    first_category = None
+    if categories:
+        cat_list = [c.strip() for c in categories.split(",") if c.strip()]
+        if len(cat_list) == 1:
+            first_category = cat_list[0]
+
+    all_items = fetch_items_from_backend(q=q, category=first_category, headers=headers)
     filtered = all_items
 
-    # Text search
+    # Text search (fallback secondary in-memory match validation)
     if q and q.strip():
         term = q.strip().lower()
         filtered = [
@@ -141,14 +159,20 @@ def search_items(
 
 
 @router.post("/semantic-search")
-def semantic_search(request: SemanticSearchRequest):
+def semantic_search(payload: SemanticSearchRequest, request: Request):
     # Mock semantic search using standard search
-    return search_items(q=request.query)
+    return search_items(request=request, q=payload.query)
 
 
 @router.get("/filters")
-def get_filters():
-    all_items = fetch_all_items()
+def get_filters(request: Request):
+    headers = {}
+    auth_header = request.headers.get("Authorization")
+    if auth_header:
+        headers["Authorization"] = auth_header
+
+    all_items = fetch_items_from_backend(headers=headers)
+    
     # Extract unique brands
     brands = list(set(i["brand"] for i in all_items))
     if not brands:

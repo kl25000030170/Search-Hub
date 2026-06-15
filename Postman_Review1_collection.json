@@ -1,0 +1,483 @@
+{
+  "info": {
+    "_postman_id": "0d944e9b-baa0-9db5-2172-ba09db521721",
+    "name": "SearchHub Review-1 API Collection",
+    "description": "Collection of API endpoints for SearchHub Review-1 target architecture (React -> FastAPI Gateway -> Spring Boot -> PostgreSQL).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Student\",\n  \"email\": \"test_student@gmail.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Registers a new user in the PostgreSQL database via Spring Boot."
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Logs in user and returns a signed JWT token."
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8001/api/auth/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Retrieves active user profile using JWT token validation."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8001/api/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "users"]
+            },
+            "description": "Retrieves all registered users from database. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Update User Role (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"name\": \"Vinayak Padalti\",\n  \"email\": \"user@gmail.com\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "users", "1"]
+            },
+            "description": "Updates details/roles of a user. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8001/api/users/PLACEHOLDER_USER_ID",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "users", "PLACEHOLDER_USER_ID"]
+            },
+            "description": "Deletes a user account. Requires ADMIN role."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "items"]
+            },
+            "description": "Retrieves all products from database. Public endpoint."
+          }
+        },
+        {
+          "name": "Create Product (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pro Wireless Mouse\",\n  \"description\": \"Precision vertical mouse for development.\",\n  \"price\": 59.99,\n  \"category\": \"Electronics\",\n  \"rating\": 4.7,\n  \"imageUrl\": \"https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=600&auto=format&fit=crop&q=80\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "items"]
+            },
+            "description": "Adds a new product to PostgreSQL. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Update Product (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pro Wireless Mouse v2\",\n  \"description\": \"Upgraded precision vertical mouse for development.\",\n  \"price\": 69.99,\n  \"category\": \"Electronics\",\n  \"rating\": 4.8,\n  \"imageUrl\": \"https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=600&auto=format&fit=crop&q=80\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/items/PLACEHOLDER_PRODUCT_ID",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "items", "PLACEHOLDER_PRODUCT_ID"]
+            },
+            "description": "Updates product details. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Delete Product (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8001/api/items/PLACEHOLDER_PRODUCT_ID",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "items", "PLACEHOLDER_PRODUCT_ID"]
+            },
+            "description": "Deletes product from database. Requires ADMIN role."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/categories",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "categories"]
+            },
+            "description": "Retrieves all category entries. Public endpoint."
+          }
+        },
+        {
+          "name": "Create Category (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mobile Development\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/categories",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "categories"]
+            },
+            "description": "Creates a new category. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Delete Category (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8001/api/categories/PLACEHOLDER_CATEGORY_ID",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "categories", "PLACEHOLDER_CATEGORY_ID"]
+            },
+            "description": "Deletes a category. Requires ADMIN role."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        {
+          "name": "List Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/courses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "courses"]
+            },
+            "description": "Retrieves all courses from database. Public endpoint."
+          }
+        },
+        {
+          "name": "Create Course (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced Java Spring\",\n  \"description\": \"Master enterprise application building with Spring.\",\n  \"difficulty\": \"Advanced\",\n  \"category\": \"Courses\",\n  \"imageUrl\": \"https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/courses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "courses"]
+            },
+            "description": "Creates a new course. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Update Course (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced Java Spring Boot\",\n  \"description\": \"Complete masterclass on Spring Boot APIs.\",\n  \"difficulty\": \"Advanced\",\n  \"category\": \"Courses\",\n  \"imageUrl\": \"https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/courses/PLACEHOLDER_COURSE_ID",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "courses", "PLACEHOLDER_COURSE_ID"]
+            },
+            "description": "Updates course details. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Delete Course (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8001/api/courses/PLACEHOLDER_COURSE_ID",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "courses", "PLACEHOLDER_COURSE_ID"]
+            },
+            "description": "Deletes course. Requires ADMIN role."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard & Search",
+      "item": [
+        {
+          "name": "Get Dashboard Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8001/api/dashboard/analytics",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "dashboard", "analytics"]
+            },
+            "description": "Retrieves core dashboard metric counts directly from Spring Boot."
+          }
+        },
+        {
+          "name": "Faceted Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/search?q=Python",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Python"
+                }
+              ]
+            },
+            "description": "Faceted query endpoint merging products and courses with in-memory filtering."
+          }
+        }
+      ]
+    }
+  ]
+}

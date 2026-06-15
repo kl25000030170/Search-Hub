@@ -1,5 +1,5 @@
 import requests
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from typing import List
 
 from models.schemas import (
@@ -10,6 +10,14 @@ from models.schemas import (
 router = APIRouter()
 
 SPRING_BOOT_URL = "http://localhost:8080"
+
+
+def get_forward_headers(request: Request):
+    headers = {}
+    auth_header = request.headers.get("Authorization")
+    if auth_header:
+        headers["Authorization"] = auth_header
+    return headers
 
 
 def to_frontend_course(sb_course):
@@ -34,9 +42,9 @@ def to_backend_course_payload(course: CourseCreate):
 
 
 @router.get("/", response_model=List[Course])
-def get_courses():
+def get_courses(request: Request):
     try:
-        response = requests.get(f"{SPRING_BOOT_URL}/courses")
+        response = requests.get(f"{SPRING_BOOT_URL}/courses", headers=get_forward_headers(request))
         if response.status_code == 200:
             return [to_frontend_course(c) for c in response.json()]
         else:
@@ -52,9 +60,9 @@ def get_courses():
 
 
 @router.get("/{course_id}", response_model=Course)
-def get_course(course_id: int):
+def get_course(course_id: int, request: Request):
     try:
-        response = requests.get(f"{SPRING_BOOT_URL}/courses/{course_id}")
+        response = requests.get(f"{SPRING_BOOT_URL}/courses/{course_id}", headers=get_forward_headers(request))
         if response.status_code == 200:
             return to_frontend_course(response.json())
         else:
@@ -70,10 +78,10 @@ def get_course(course_id: int):
 
 
 @router.post("/", response_model=Course)
-def create_course(course: CourseCreate):
+def create_course(course: CourseCreate, request: Request):
     payload = to_backend_course_payload(course)
     try:
-        response = requests.post(f"{SPRING_BOOT_URL}/courses", json=payload)
+        response = requests.post(f"{SPRING_BOOT_URL}/courses", json=payload, headers=get_forward_headers(request))
         if response.status_code in [200, 201]:
             return to_frontend_course(response.json())
         else:
@@ -92,13 +100,15 @@ def create_course(course: CourseCreate):
 @router.put("/{course_id}", response_model=Course)
 def update_course(
     course_id: int,
-    updated_course: CourseCreate
+    updated_course: CourseCreate,
+    request: Request
 ):
     payload = to_backend_course_payload(updated_course)
     try:
         response = requests.put(
             f"{SPRING_BOOT_URL}/courses/{course_id}",
-            json=payload
+            json=payload,
+            headers=get_forward_headers(request)
         )
         if response.status_code == 200:
             return to_frontend_course(response.json())
@@ -115,15 +125,16 @@ def update_course(
 
 
 @router.delete("/{course_id}")
-def delete_course(course_id: int):
+def delete_course(course_id: int, request: Request):
     try:
+        headers = get_forward_headers(request)
         # Check if exists first to return deleted metadata
-        check_resp = requests.get(f"{SPRING_BOOT_URL}/courses/{course_id}")
+        check_resp = requests.get(f"{SPRING_BOOT_URL}/courses/{course_id}", headers=headers)
         if check_resp.status_code != 200:
             raise HTTPException(status_code=404, detail="Course not found")
         deleted_course = to_frontend_course(check_resp.json())
 
-        response = requests.delete(f"{SPRING_BOOT_URL}/courses/{course_id}")
+        response = requests.delete(f"{SPRING_BOOT_URL}/courses/{course_id}", headers=headers)
         if response.status_code in [200, 204]:
             return {
                 "message": "Course Deleted",

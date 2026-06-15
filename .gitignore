@@ -79,3 +79,11 @@ start_gateway.bat
 start_spring_backend.sh
 start_spring_backend.bat
 
+# ==========================================
+# New Frontend & Search Analytics Services
+# ==========================================
+DSEDBD_group_project/node_modules/
+DSEDBD_group_project/dist/
+Nodejs/node_modules/
+Nodejs/.env
+gateway/verify_secure.py

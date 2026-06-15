@@ -1,5 +1,5 @@
 import requests
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from typing import List
 
 from models.schemas import (
@@ -10,6 +10,14 @@ from models.schemas import (
 router = APIRouter()
 
 SPRING_BOOT_URL = "http://localhost:8080"
+
+
+def get_forward_headers(request: Request):
+    headers = {}
+    auth_header = request.headers.get("Authorization")
+    if auth_header:
+        headers["Authorization"] = auth_header
+    return headers
 
 
 def to_frontend_product(sb_prod):
@@ -25,9 +33,9 @@ def to_frontend_product(sb_prod):
 
 
 @router.get("/", response_model=List[Product])
-def get_products():
+def get_products(request: Request):
     try:
-        response = requests.get(f"{SPRING_BOOT_URL}/products")
+        response = requests.get(f"{SPRING_BOOT_URL}/products", headers=get_forward_headers(request))
         if response.status_code == 200:
             return [to_frontend_product(p) for p in response.json()]
         else:
@@ -43,9 +51,9 @@ def get_products():
 
 
 @router.get("/{product_id}", response_model=Product)
-def get_product(product_id: int):
+def get_product(product_id: int, request: Request):
     try:
-        response = requests.get(f"{SPRING_BOOT_URL}/products/{product_id}")
+        response = requests.get(f"{SPRING_BOOT_URL}/products/{product_id}", headers=get_forward_headers(request))
         if response.status_code == 200:
             return to_frontend_product(response.json())
         else:
@@ -61,11 +69,12 @@ def get_product(product_id: int):
 
 
 @router.post("/", response_model=Product)
-def create_product(product: ProductCreate):
+def create_product(product: ProductCreate, request: Request):
     try:
         response = requests.post(
             f"{SPRING_BOOT_URL}/products",
-            json=product.dict()
+            json=product.dict(),
+            headers=get_forward_headers(request)
         )
         if response.status_code in [200, 201]:
             return to_frontend_product(response.json())
@@ -85,12 +94,14 @@ def create_product(product: ProductCreate):
 @router.put("/{product_id}", response_model=Product)
 def update_product(
     product_id: int,
-    updated_product: ProductCreate
+    updated_product: ProductCreate,
+    request: Request
 ):
     try:
         response = requests.put(
             f"{SPRING_BOOT_URL}/products/{product_id}",
-            json=updated_product.dict()
+            json=updated_product.dict(),
+            headers=get_forward_headers(request)
         )
         if response.status_code == 200:
             return to_frontend_product(response.json())
@@ -107,15 +118,16 @@ def update_product(
 
 
 @router.delete("/{product_id}")
-def delete_product(product_id: int):
+def delete_product(product_id: int, request: Request):
     try:
+        headers = get_forward_headers(request)
         # Check if exists first to return deleted metadata
-        check_resp = requests.get(f"{SPRING_BOOT_URL}/products/{product_id}")
+        check_resp = requests.get(f"{SPRING_BOOT_URL}/products/{product_id}", headers=headers)
         if check_resp.status_code != 200:
             raise HTTPException(status_code=404, detail="Product not found")
         deleted_prod = to_frontend_product(check_resp.json())
 
-        response = requests.delete(f"{SPRING_BOOT_URL}/products/{product_id}")
+        response = requests.delete(f"{SPRING_BOOT_URL}/products/{product_id}", headers=headers)
         if response.status_code in [200, 204]:
             return {
                 "message": "Product Deleted",

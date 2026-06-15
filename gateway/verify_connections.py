@@ -3,7 +3,7 @@ import json
 import time
 
 SPRING_BOOT_URL = "http://localhost:8080"
-GATEWAY_URL = "http://localhost:8000/api"
+GATEWAY_URL = "http://localhost:8001/api"
 
 print("=" * 60)
 print("TESTING SPRING BOOT ENDPOINTS")

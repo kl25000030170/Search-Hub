@@ -35,6 +35,9 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+        if (userDTO.getRole() == null || userDTO.getRole().trim().isEmpty()) {
+            userDTO.setRole("USER");
+        }
         UserDTO createdUser = userService.createUser(userDTO);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
@@ -46,7 +49,17 @@ public class UserController {
         if (email == null || password == null) {
             return ResponseEntity.badRequest().body("Email and password are required");
         }
-        UserDTO user = userService.login(email, password);
+        java.util.Map<String, Object> loginResponse = userService.login(email, password);
+        return ResponseEntity.ok(loginResponse);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<UserDTO> getUserProfile(java.security.Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = principal.getName();
+        UserDTO user = userService.getUserByEmail(email);
         return ResponseEntity.ok(user);
     }
 

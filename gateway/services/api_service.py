@@ -9,6 +9,8 @@ from controllers.coursecontroller import router as course_router
 from controllers.searchcontroller import router as search_router
 from controllers.ordercontroller import router as order_router
 from controllers.usercontroller import router as user_router
+from controllers.dashboardcontroller import router as dashboard_router
+from controllers.analyticscontroller import router as analytics_router
 
 app = FastAPI(
     title="SearchHub Gateway",
@@ -78,6 +80,18 @@ app.include_router(
 
 app.include_router(
     user_router,
-    prefix="/users",
+    prefix="/api/users",
     tags=["Users"]
 )
+
+app.include_router(
+    dashboard_router,
+    prefix="/api/dashboard",
+    tags=["Dashboard"]
+)
+
+app.include_router(
+    analytics_router,
+    prefix="/api",
+    tags=["Analytics"]
+)

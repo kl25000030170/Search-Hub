@@ -5,11 +5,15 @@ import com.searchfilter.platform.entity.User;
 import com.searchfilter.platform.exception.BadRequestException;
 import com.searchfilter.platform.exception.ResourceNotFoundException;
 import com.searchfilter.platform.repository.UserRepository;
+import com.searchfilter.platform.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,10 +21,16 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public List<UserDTO> getAllUsers() {
@@ -45,17 +55,25 @@ public class UserService {
         }
 
         User user = mapToEntity(userDTO);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
         return mapToDTO(savedUser);
     }
 
-    public UserDTO login(String email, String password) {
+    public Map<String, Object> login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-        if (!user.getPassword().equals(password)) {
+        
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BadRequestException("Invalid password");
         }
-        return mapToDTO(user);
+
+        String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("user", mapToDTO(user));
+        return response;
     }
 
     public UserDTO updateUser(Long id, UserDTO userDTO) {
@@ -71,7 +89,7 @@ public class UserService {
         existingUser.setName(userDTO.getName());
         existingUser.setEmail(userDTO.getEmail());
         if (userDTO.getPassword() != null && !userDTO.getPassword().trim().isEmpty()) {
-            existingUser.setPassword(userDTO.getPassword());
+            existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
         existingUser.setRole(userDTO.getRole());
 
@@ -84,6 +102,12 @@ public class UserService {
             throw new ResourceNotFoundException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
+    }
+
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        return mapToDTO(user);
     }
 
     // Helper methods for DTO-Entity mappings

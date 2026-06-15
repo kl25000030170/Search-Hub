@@ -1,0 +1,211 @@
+{
+  "info": {
+    "_postman_id": "0d944e9b-baa0-9db5-2172-ba09db521720",
+    "name": "SearchHub Analytics API Collection",
+    "description": "Collection of API endpoints for the SearchHub Analytics Microservice routed via the FastAPI Gateway (or direct access).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Diagnostics",
+      "item": [
+        {
+          "name": "Service Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/test",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "test"]
+            },
+            "description": "Checks if the Node.js express microservice is up and reachable via the gateway."
+          }
+        },
+        {
+          "name": "MongoDB connection Diagnostic Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/test/db",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "test", "db"]
+            },
+            "description": "Performs write/read/delete diagnostics directly on the MongoDB Atlas cluster."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search & Logging",
+      "item": [
+        {
+          "name": "Log Search Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"demo-user-123\",\n  \"email\": \"user@example.com\",\n  \"keyword\": \"Java Programming\",\n  \"category\": \"Courses\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8001/api/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "search"]
+            },
+            "description": "Logs a search query to MongoDB Atlas, updating user history, recent searches, trending lists, and dashboard stats."
+          }
+        },
+        {
+          "name": "Get User Search History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/search/history/demo-user-123",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "search", "history", "demo-user-123"]
+            },
+            "description": "Retrieves the full search history for a user, including their search count and frequently searched terms."
+          }
+        },
+        {
+          "name": "Get User Recent Searches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/search/recent/demo-user-123",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "search", "recent", "demo-user-123"]
+            },
+            "description": "Retrieves the latest searches (up to 10) performed by the user."
+          }
+        },
+        {
+          "name": "Delete Single Search History Entry",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/search/history/PLACEHOLDER_HISTORY_ID",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "search", "history", "PLACEHOLDER_HISTORY_ID"]
+            },
+            "description": "Deletes a single search log entry by its MongoDB Object ID."
+          }
+        },
+        {
+          "name": "Clear Full User History",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/search/history/user/demo-user-123",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "search", "history", "user", "demo-user-123"]
+            },
+            "description": "Clears all search logs and recent search items for the specified user."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Suggestions & Aggregates",
+      "item": [
+        {
+          "name": "Get Prefix Suggestions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/search/suggestions?q=Ja",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "search", "suggestions"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Ja"
+                }
+              ]
+            },
+            "description": "Retrieves auto-suggestions prefix-matched against searched terms (e.g. typing 'Ja' yields 'Java', 'Javascript')."
+          }
+        },
+        {
+          "name": "Get Trending Searches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/search/trending",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "search", "trending"]
+            },
+            "description": "Returns top searched keywords across the entire platform."
+          }
+        },
+        {
+          "name": "Get Popular Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/search/categories",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "search", "categories"]
+            },
+            "description": "Returns categories with the most query traffic."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Analytics",
+      "item": [
+        {
+          "name": "Get Admin Dashboard Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8001/api/admin/dashboard",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8001",
+              "path": ["api", "admin", "dashboard"]
+            },
+            "description": "Fetches aggregated analytics details, popular categories distribution, active queries, and 7-day query frequency logs."
+          }
+        }
+      ]
+    }
+  ]
+}
