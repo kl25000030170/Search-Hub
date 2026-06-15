@@ -47,12 +47,11 @@ services:
         value: http://searchhub-analytics:5001
 
   # 4. React SPA Frontend (Static Site)
-  - type: web
+  - type: static
     name: searchhub-frontend
-    env: static
     rootDir: DSEDBD_group_project
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    publishPath: dist
     envVars:
       - key: VITE_API_URL
         value: http://localhost:8001/api # Will be replaced dynamically in Render dashboard with Gateway URL + /api
