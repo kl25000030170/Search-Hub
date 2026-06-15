@@ -1,63 +1,79 @@
+databases:
+  - name: smartsearchhub-db
+    databaseName: smartsearchhub
+    user: postgres
+    plan: free
+
 services:
-  # 1. Spring Boot Core Backend
+  # 1. Spring Boot Backend Service (using Dockerfile)
   - type: web
-    name: searchhub-backend
-    env: java
+    name: smartsearchhub-backend
+    runtime: docker
     rootDir: backend
-    buildCommand: mvn clean package -DskipTests
-    startCommand: java -jar target/platform-0.0.1-SNAPSHOT.jar
+    plan: free
     envVars:
-      - key: SPRING_DATASOURCE_URL
+      - key: PORT
+        value: 8080
+      - key: DB_HOST
         fromDatabase:
-          name: searchhub-db
-          property: connectionString
+          name: smartsearchhub-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: smartsearchhub-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: smartsearchhub-db
+          property: database
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
-          name: searchhub-db
+          name: smartsearchhub-db
           property: user
       - key: SPRING_DATASOURCE_PASSWORD
         fromDatabase:
-          name: searchhub-db
+          name: smartsearchhub-db
           property: password
 
-  # 2. Node.js Search Analytics API
+  # 2. Node.js Analytics Backend Service
   - type: web
-    name: searchhub-analytics
-    env: node
+    name: smartsearchhub-nodejs
+    runtime: node
     rootDir: Nodejs
     buildCommand: npm install
     startCommand: npm start
+    plan: free
     envVars:
       - key: PORT
         value: 5001
       - key: MONGO_URI
         value: mongodb+srv://Admin:SearchHub123@cluster0.svg74nb.mongodb.net/searchhub_analytics?retryWrites=true&w=majority&appName=Cluster0
 
-  # 3. FastAPI API Gateway
+  # 3. FastAPI Gateway Service
   - type: web
-    name: searchhub-gateway
-    env: python
+    name: smartsearchhub-gateway
+    runtime: python
     rootDir: gateway
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
     envVars:
+      - key: PORT
+        value: 8000
       - key: SPRING_BACKEND_URL
-        value: http://searchhub-backend:8080
+        value: http://smartsearchhub-backend:8080
       - key: NODE_JS_URL
-        value: http://searchhub-analytics:5001
+        value: http://smartsearchhub-nodejs:5001
 
-  # 4. React SPA Frontend (Static Site)
-  - type: static
-    name: searchhub-frontend
+  # 4. React Frontend Static Site
+  - type: web
+    name: smartsearchhub-frontend
+    runtime: static
     rootDir: DSEDBD_group_project
     buildCommand: npm install && npm run build
-    publishPath: dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
         value: http://localhost:8001/api # Will be replaced dynamically in Render dashboard with Gateway URL + /api
-
-databases:
-  # Managed PostgreSQL Database on Render
-  - name: searchhub-db
-    databaseName: SearchHub
-    user: searchhub_user
