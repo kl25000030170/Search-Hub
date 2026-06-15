@@ -1,7 +1,6 @@
 databases:
   - name: smartsearchhub-db
     databaseName: smartsearchhub
-    user: postgres
     plan: free
 
 services:
